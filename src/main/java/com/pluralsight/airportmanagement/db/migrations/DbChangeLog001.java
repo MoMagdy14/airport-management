@@ -1,63 +1,51 @@
-package com.pluralsight.airportmanagement;
+package com.pluralsight.airportmanagement.db.migrations;
 
-
-import com.pluralsight.airportmanagement.db.AirportRepository;
-import com.pluralsight.airportmanagement.db.FlightInformationRepository;
-import com.pluralsight.airportmanagement.domain.*;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
+import com.github.mongobee.changeset.ChangeLog;
+import com.github.mongobee.changeset.ChangeSet;
+import com.pluralsight.airportmanagement.domain.Aircraft;
+import com.pluralsight.airportmanagement.domain.Airport;
+import com.pluralsight.airportmanagement.domain.FlightInformation;
+import com.pluralsight.airportmanagement.domain.FlightType;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.stereotype.Component;
-
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-/*
-This component should populate the database if empty.
- */
-
-@Component
-@Order(1)
-public class DatabaseSeederRunner implements CommandLineRunner {
-    private FlightInformationRepository flightRepository;
-    private AirportRepository airportRepository;
-    private MongoTemplate mongoTemplate;
-
-    public DatabaseSeederRunner(FlightInformationRepository flightRepository,
-                                AirportRepository airportRepository,
-                                MongoTemplate mongoTemplate) {
-        this.flightRepository = flightRepository;
-        this.airportRepository = airportRepository;
-        this.mongoTemplate = mongoTemplate;
-    }
-
-    @Override
-    public void run(String... args) {
-        empty();
-        seed();
-    }
-
-    private void seed() {
-        // Airports
+@ChangeLog(order = "001")
+public class DbChangeLog001 {
+    @ChangeSet(order = "001", id = "seedAirports", author = "Mo")
+    public void seedAirports(MongoTemplate mongoTemplate) {
         Airport rome = new Airport(
                 "1d1aab22-670b-48cb-a027-721e2055731f",
                 "Leonardo da Vinci",
                 "Rome",
                 42995119);
+
         Airport paris = new Airport(
                 "d04a8c26-7527-407c-81ef-680e5de34cea",
                 "Charles de Gaulle",
                 "Paris",
                 72229723);
+
         Airport copenhagen = new Airport(
                 "7ed990d2-6471-485d-931e-c77729dc0f25",
                 "Copenhagen Airport",
                 "Copenhagen",
                 30298531);
 
-        // Flight data
+        List<Airport> airports = Arrays.asList(rome, paris, copenhagen);
+        mongoTemplate.insertAll(airports);
+
+        System.out.println("DB Migrations - ChangeLog 001, ChangeSet 001");
+    }
+
+    @ChangeSet(order = "002", id = "seedFlight", author = "Mo")
+    public void seedFlights(MongoTemplate mongoTemplate) {
+        Airport rome = mongoTemplate.findById("1d1aab22-670b-48cb-a027-721e2055731f", Airport.class);
+        Airport paris = mongoTemplate.findById("d04a8c26-7527-407c-81ef-680e5de34cea", Airport.class);
+        Airport copenhagen = mongoTemplate.findById("7ed990d2-6471-485d-931e-c77729dc0f25", Airport.class);
+
         FlightInformation flightOne = new FlightInformation();
         flightOne.setId("b8b50563-ca90-4afc-9d43-b674892a525c");
         flightOne.setDelayed(false);
@@ -76,21 +64,11 @@ public class DatabaseSeederRunner implements CommandLineRunner {
         flightTwo.setDepartureDate(LocalDate.of(2019, 5, 11));
         flightTwo.setType(FlightType.International);
         flightTwo.setDurationMin(600);
-        flightTwo.setAircraft(new Aircraft("747", 300));
-
-        // Seed
-
+        flightTwo.setAircraft(new Aircraft("745", 333));
 
         List<FlightInformation> flights = Arrays.asList(flightOne, flightTwo);
-        this.flightRepository.insert(flights);
+        mongoTemplate.insertAll(flights);
 
-        // Print
-        FlightPrinter.print(flights);
-    }
-
-
-    private void empty() {
-        this.mongoTemplate.dropCollection(Airport.class);
-        this.mongoTemplate.dropCollection(FlightInformation.class);
+        System.out.println("DB Migrations - ChangeLog 001, ChangeSet 002");
     }
 }
