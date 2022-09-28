@@ -11,8 +11,8 @@ public class FlightPrinter {
         System.out.println(header);
         for (FlightInformation f: flights) {
             String data = String.format("%-12s %-12s %-8s %-13s %-9s %-8s %-8s %s",
-                    f.getDepartureCity(),
-                    f.getDestinationCity(),
+                    f.getDeparture(),
+                    f.getDestination(),
                     f.getDurationMin(),
                     f.getDepartureDate(),
                     f.isDelayed(),

@@ -1,6 +1,8 @@
 package com.pluralsight.airportmanagement;
 
+import com.pluralsight.airportmanagement.db.AirportRepository;
 import com.pluralsight.airportmanagement.db.FlightInformationRepository;
+import com.pluralsight.airportmanagement.domain.Airport;
 import com.pluralsight.airportmanagement.domain.FlightInformation;
 import com.pluralsight.airportmanagement.domain.FlightPrinter;
 import com.pluralsight.airportmanagement.queries.FlightInformationQueries;
@@ -19,67 +21,23 @@ import java.util.List;
 @Component
 @Order(2)
 public class ApplicationRunner implements CommandLineRunner {
-    private FlightInformationRepository repository;
+    private FlightInformationRepository flightRepository;
+    private AirportRepository airportRepository;
 
-    public ApplicationRunner(FlightInformationRepository repository) {
-        this.repository = repository;
+    public ApplicationRunner(FlightInformationRepository flightRepository, AirportRepository airportRepository) {
+        this.flightRepository = flightRepository;
+        this.airportRepository = airportRepository;
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        printById("4d23fd8b-47a7-45f8-958c-94d0e21488b2");
+    public void run(String... args) {
+        // Single update point
+        Airport rome = this.airportRepository.findById("1d1aab22-670b-48cb-a027-721e2055731f").get();
+        rome.setName("Leonardo da Vinci (Fiumicino)");
+        this.airportRepository.save(rome);
 
-        delayFlight("4d23fd8b-47a7-45f8-958c-94d0e21488b2", 30);
-
-        removeFlight("4d23fd8b-47a7-45f8-958c-94d0e21488b2");
-
-        printByDepartureAndDestination("Madrid", "Barcelona");
-
-        printByMinNbSeats(200);
-    }
-
-    private void printById(String id) {
-        System.out.println("Flight " + id);
-
-        FlightInformation flight = this.repository
-                .findById(id)
-                .get();
-        FlightPrinter.print(Arrays.asList(flight));
-    }
-
-    private void delayFlight(String id, int duration) {
-        FlightInformation flight = this.repository
-                .findById(id)
-                .get();
-
-        flight.setDurationMin(flight.getDurationMin() + duration);
-
-        this.repository.save(flight);
-
-        System.out.println("Updated flight " + id + "\n");
-    }
-
-    private void removeFlight(String id) {
-        this.repository.deleteById(id);
-
-        System.out.println("Deleted flight " + id + "\n");
-    }
-
-    private void printByDepartureAndDestination(String dep, String dst) {
-        System.out.println("Flights from " + dep + " to " + dst);
-
-        List<FlightInformation> flights = this.repository
-                .findByDepartureCityAndDestinationCity(dep, dst);
-
+        System.out.println("-> AFTER UPDATE TO ROME AIRPORT");
+        List<FlightInformation> flights = this.flightRepository.findAll();
         FlightPrinter.print(flights);
-    }
-
-    private void printByMinNbSeats(int minNbSeats) {
-        System.out.println("Flights by min nb seats " + minNbSeats);
-
-        List<FlightInformation> flights = this.repository
-                .findByMinAircraftNbSeats(200);
-
-
     }
 }

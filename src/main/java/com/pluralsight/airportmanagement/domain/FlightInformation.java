@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -31,13 +32,11 @@ public class FlightInformation {
     @Indexed(unique = true)
     private String internalId;
 
-    @Field("departure")
-    @TextIndexed
-    private String departureCity;
+    @DBRef
+    private Airport departure;
 
-    @Field("destination")
-    @TextIndexed
-    private String destinationCity;
+    @DBRef
+    private Airport destination;
 
     @TextIndexed(weight = 2)
     private String description;
@@ -60,20 +59,20 @@ public class FlightInformation {
         return id;
     }
 
-    public String getDepartureCity() {
-        return departureCity;
+    public Airport getDeparture() {
+        return departure;
     }
 
-    public void setDepartureCity(String departureCity) {
-        this.departureCity = departureCity;
+    public void setDeparture(Airport departure) {
+        this.departure = departure;
     }
 
-    public String getDestinationCity() {
-        return destinationCity;
+    public Airport getDestination() {
+        return destination;
     }
 
-    public void setDestinationCity(String destinationCity) {
-        this.destinationCity = destinationCity;
+    public void setDestination(Airport destination) {
+        this.destination = destination;
     }
 
     public FlightType getType() {
